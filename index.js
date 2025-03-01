@@ -6,6 +6,7 @@ const cors = require('cors')
 const app = express()
 
 app.use(express.json())
+app.use(express.static('dist'))
 
 const requestLogger = (request,response,next) =>{
   console.log('Method:', request.method)
@@ -50,7 +51,7 @@ app.get('/api/notes',(request,response) => {
     response.json(notes)
 })
 const generateId = () =>{
-  const maxId = notes.length > 0? Math.max(...notes.map(n => Number(n,id))):0
+  const maxId = notes.length > 0? Math.max(...notes.map(n => Number(n.id))):0
   return String(maxId + 1)
 }
 app.get('/api/notes/:id',(request,response) => {
@@ -86,6 +87,16 @@ app.delete('/api/notes/:id',(request,respone) => {
   notes = notes.filter(note => note.id != id)
   respone.status(204).end()
 })
+
+app.put('/api/notes/:id',(request,response)=>{
+  const id = request.params.id
+  const updatedNote = request.body
+  const toChange = notes.find(n => n.id == id)
+  notes = notes.filter(n => n.id == id?toChange:n)
+  response.json(updatedNote)
+
+})
+
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
 }
